@@ -1,0 +1,153 @@
+
+atlasB.png
+size: 1024,1024
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+bombN
+  rotate: false
+  xy: 552, 644
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+bombP
+  rotate: false
+  xy: 588, 691
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+down
+  rotate: false
+  xy: 2, 164
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 1
+down
+  rotate: false
+  xy: 516, 678
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 2
+down
+  rotate: false
+  xy: 2, 117
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 3
+empty
+  rotate: false
+  xy: 2, 36
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+explosionR
+  rotate: false
+  xy: 38, 83
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+explosionU
+  rotate: false
+  xy: 74, 130
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+exsplosionM
+  rotate: false
+  xy: 110, 177
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+left
+  rotate: false
+  xy: 38, 164
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 1
+left
+  rotate: false
+  xy: 516, 631
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 2
+power
+  rotate: false
+  xy: 516, 550
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+right
+  rotate: false
+  xy: 552, 678
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 1
+right
+  rotate: false
+  xy: 2, 70
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 2
+skull
+  rotate: false
+  xy: 2, 211
+  size: 512, 512
+  orig: 512, 512
+  offset: 0, 0
+  index: -1
+speedup
+  rotate: false
+  xy: 552, 610
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+up
+  rotate: false
+  xy: 38, 117
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 1
+up
+  rotate: false
+  xy: 74, 164
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 2
+up
+  rotate: false
+  xy: 516, 584
+  size: 34, 45
+  orig: 34, 45
+  offset: 0, 0
+  index: 3
+wall
+  rotate: false
+  xy: 622, 691
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
+wallS
+  rotate: false
+  xy: 2, 2
+  size: 32, 32
+  orig: 32, 32
+  offset: 0, 0
+  index: -1
