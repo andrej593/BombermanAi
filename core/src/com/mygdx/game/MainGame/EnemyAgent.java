@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.pathfinding.GameFieldGraph;
 
-
 public class EnemyAgent extends Character {
     public static final int UPDATE = 15;    //čas posodobitve poti
     int updateCounter;
@@ -23,7 +22,9 @@ public class EnemyAgent extends Character {
     public GraphPath<Tile> playerPath;  //graphWalls
 
     public StateMachine<EnemyAgent, EnemyState> stateMachine;
+    public StateMachine<EnemyAgent, EnemySubState> subStateMachine;
 
+    EnemySubState subState;
     boolean isSafe; //če je varen
     Character target;   //igralec ki je trenutna tarča
 
@@ -39,14 +40,19 @@ public class EnemyAgent extends Character {
         this.isSafe = true;
         this.target = target;
         this.bombs = bombs;
-        this.stateMachine = new DefaultStateMachine<>(this, EnemyState.NONE);
+        this.stateMachine = new DefaultStateMachine<>(this, EnemyState.ISSAFE);
         this.updateCounter = 0;
         this.players = players;
+        this.subStateMachine = new DefaultStateMachine<>(this, EnemySubState.NONE);
+        findPlayerPath();
+        findSafePath();
     }
 
     public void update(float delta, Array<Bomb> bombs, boolean inputData[]) {
         checkIfSafe();  //pogledam če je character varen
         stateMachine.update();
+        subStateMachine.update();
+        MainScreen.log.debug("Player:"+this.username+", "+subStateMachine.getCurrentState()+", "+subState);
     }
 
 
@@ -57,21 +63,14 @@ public class EnemyAgent extends Character {
             if (this.bounds.overlaps(t.bounds)) {
                 if (t.getWillExplode()) {
                     isSafe = false;
+                    subState = EnemySubState.NONE;
                     break;
                 }
             }
         }
     }
 
-    //premikanje proti playerju
-    public void moveToPlayer() {
-        //poti ne posodabljam vsaki frame
-        if (updateCounter == UPDATE) {
-            findPlayerPath();
-            updateCounter = 0;
-        }
-        updateCounter++;
-
+    public void moveCloser() {
         float delta = Gdx.graphics.getDeltaTime();
         boolean mUp = false;
         boolean mDown = false;
@@ -79,57 +78,85 @@ public class EnemyAgent extends Character {
         boolean mRight = false;
         boolean placeBomb = false;
 
+        for (int i = 0; i < playerPath.getCount(); i++) {
+            if (this.bounds.overlaps(playerPath.get(i).bounds)) {
+                if (playerPath.get(i + 1).isTile(GameField.FIELD_WALL) && checkIfSafeToPlaceBomb()) {
+                    placeBomb = true;
+                } else {
+                    if (playerPath.get(i + 1).pos.x > this.bounds.x) {
+                        mRight = true;
+                    } else if (playerPath.get(i + 1).pos.x + 0.1f < this.bounds.x) {
+                        mLeft = true;
+                    }
+                    if (playerPath.get(i + 1).pos.y > this.bounds.y) {
+                        mUp = true;
+                    } else if (playerPath.get(i + 1).pos.y + 0.1f < this.bounds.y) {
+                        mDown = true;
+                    }
+                }
+                break;
+            }
+        }
+        super.update(delta, bombs, new boolean[]{mLeft, mRight, mUp, mDown, placeBomb});
+    }
+
+    public void placeBomb() {
+        if (checkIfSafeToPlaceBomb())
+            super.update(Gdx.graphics.getDeltaTime(), bombs, new boolean[]{false, false, false, false, true});
+    }
+
+    public void moveAway() {
+        float delta = Gdx.graphics.getDeltaTime();
+        boolean mUp = false;
+        boolean mDown = false;
+        boolean mLeft = false;
+        boolean mRight = false;
+        boolean placeBomb = false;
+
+        for (int i = 0; i < playerPath.getCount(); i++) {
+            if (this.bounds.overlaps(playerPath.get(i).bounds)) {
+                if (runner) {
+                    if (playerPath.get(i).right(gameField).isSafeTile())
+                        mRight = true;
+                    if (playerPath.get(i).up(gameField).isSafeTile())
+                        mUp = true;
+                } else {
+                    if (playerPath.get(i).left(gameField).isSafeTile())
+                        mLeft = true;
+                    if (playerPath.get(i).down(gameField).isSafeTile())
+                        mDown = true;
+                }
+                break;
+            }
+        }
+        super.update(delta, bombs, new boolean[]{mLeft, mRight, mUp, mDown, placeBomb});
+    }
+
+    //premikanje proti playerju
+    public void determineSubState() {
+        //poti ne posodabljam vsaki frame
+        if (updateCounter == UPDATE) {
+            findPlayerPath();
+            updateCounter = 0;
+        } else {
+            updateCounter++;
+        }
+
         // ugotovim kam se hoče character pemaknit, če hoče nastaviti bombo
         for (int i = 0; i < playerPath.getCount(); i++) {
             //na katerem tileu je character
             if (this.bounds.overlaps(playerPath.get(i).bounds)) {
                 //če je od tarče oddaljen več kot 2 tilea
                 if (i + 2 < playerPath.getCount()) {
-                    //če je nasledni tile zid pogledam če je varno nastaviti bombo in jo nastavi
-                    if (playerPath.get(i + 1).isTile(GameField.FIELD_WALL) && checkIfSafeToPlaceBomb()) {
-                        placeBomb = true;
-                    } else {
-                        //premik na naslednji tile v poti
-                        if (playerPath.get(i + 1).pos.x > this.bounds.x) {
-                            mRight = true;
-                        } else if (playerPath.get(i + 1).pos.x + 0.1f < this.bounds.x) {
-                            mLeft = true;
-                        }
-                        if (playerPath.get(i + 1).pos.y > this.bounds.y) {
-                            mUp = true;
-                        } else if (playerPath.get(i + 1).pos.y + 0.1f < this.bounds.y) {
-                            mDown = true;
-                        }
-                    }
-                    //če je od tarče odaljen 1 kvadratek in je varno nastavit bombo jo nastavi
+                    subState = EnemySubState.OUTOFRANGE;
                 } else if (i + 1 < playerPath.getCount()) {
-                    if (checkIfSafeToPlaceBomb()) {
-                        placeBomb = true;
-                    }
+                    subState = EnemySubState.INRANGE;
                 } else {
-                    //če je v tarči gre vstran od nje(imel sem problem,
-                    // če sta bila dva ai playerja sta prišla drug v drugega, nastavila bombo,
-                    // našla enako pot na varnost se premaknila tja in to ponavljala v neskončnost) zato se zdaj če se že znajdeta v istem tileu najprej
-                    //ločita in nato nastavljata bombe
-
-                    if (runner) {//da imata različno vedenje ko se srečata - en gre levo dol, drugi desno gor
-                        if (playerPath.get(i).right(gameField).isSafeTile())
-                            mRight = true;
-                        if (playerPath.get(i).up(gameField).isSafeTile())
-                            mUp = true;
-                    } else {
-                        if (playerPath.get(i).left(gameField).isSafeTile())
-                            mLeft = true;
-                        if (playerPath.get(i).down(gameField).isSafeTile())
-                            mDown = true;
-                    }
+                    subState = EnemySubState.OVERLAPING;
                 }
                 break;
             }
         }
-
-        //izvedem premikanje, nastavljanje bombe
-        super.update(delta, bombs, new boolean[]{mLeft, mRight, mUp, mDown, placeBomb});
     }
 
     //premikanje na varnost

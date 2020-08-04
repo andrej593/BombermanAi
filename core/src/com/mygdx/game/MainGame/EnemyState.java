@@ -5,17 +5,6 @@ import com.badlogic.gdx.ai.msg.Telegram;
 import com.mygdx.game.pathfinding.GameFieldGraph;
 
 public enum EnemyState implements State<EnemyAgent> {
-    //na začetku igre
-    NONE(){
-        @Override
-        public void update(EnemyAgent entity) {
-            if(entity.isSafe){
-                entity.stateMachine.changeState(ISSAFE);
-            }else{
-                entity.stateMachine.changeState(INDANGER);
-            }
-        }
-    },
     //če je v nevarnosti
     INDANGER(){
         @Override
@@ -39,7 +28,7 @@ public enum EnemyState implements State<EnemyAgent> {
                 entity.stateMachine.changeState(INDANGER);
             }else{
                 //premik proti tarči
-                entity.moveToPlayer();
+                entity.determineSubState();
             }
 
         }
