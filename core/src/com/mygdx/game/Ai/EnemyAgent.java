@@ -1,4 +1,4 @@
-package com.mygdx.game.MainGame;
+package com.mygdx.game.Ai;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
@@ -9,15 +9,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.pathfinding.GameFieldGraph;
+import com.mygdx.game.MainGame.Bomb;
+import com.mygdx.game.MainGame.Character;
+import com.mygdx.game.MainGame.GameField;
+import com.mygdx.game.MainGame.Tile;
+import com.mygdx.game.Ai.Pathfinding.GameFieldGraph;
+
+import java.util.Comparator;
 
 public class EnemyAgent extends Character {
-    public static final int UPDATE = 15;    //čas posodobitve poti
     int updateCounter;
-
 
     GameFieldGraph gameFieldGraphWalls; //graf ki vsebuje varna polja in navadne zidove
     GameFieldGraph gameFieldGraphEmpty; //graf ki vsebuje polja ki so trenutno prehodna
+
+    public int difficulty;
     public GraphPath<Tile> safePath;    //graphEmpty
     public GraphPath<Tile> playerPath;  //graphWalls
 
@@ -30,10 +36,10 @@ public class EnemyAgent extends Character {
 
     Array<Bomb> bombs;
     Array<Character> players;
-
+    int updateInterval;
 
     public EnemyAgent(int x, int y, TextureAtlas atlas, String u, Color c, GameField gf, Array<Character> players, Character target, Array<Bomb> bombs
-            , GameFieldGraph gameFieldGraphWalls, GameFieldGraph gameFieldGraphEmpty) {
+            , GameFieldGraph gameFieldGraphWalls, GameFieldGraph gameFieldGraphEmpty, int difficulty) {
         super(x, y, atlas, u, c, gf);
         this.gameFieldGraphWalls = gameFieldGraphWalls;
         this.gameFieldGraphEmpty = gameFieldGraphEmpty;
@@ -44,15 +50,23 @@ public class EnemyAgent extends Character {
         this.updateCounter = 0;
         this.players = players;
         this.subStateMachine = new DefaultStateMachine<>(this, EnemySubState.NONE);
+        this.difficulty=difficulty;
         findPlayerPath();
         findSafePath();
+        if(difficulty == 0){
+            updateInterval =0;
+        }else if(difficulty == 1){
+            updateInterval =15;
+        }else if(difficulty == 2){
+            updateInterval =30;
+        }
     }
 
     public void update(float delta, Array<Bomb> bombs, boolean inputData[]) {
         checkIfSafe();  //pogledam če je character varen
         stateMachine.update();
         subStateMachine.update();
-        MainScreen.log.debug("Player:"+this.username+", "+subStateMachine.getCurrentState()+", "+subState);
+        //MainScreen.log.debug("Player:" + this.username + ", " + subStateMachine.getCurrentState() + ", " + subState);
     }
 
 
@@ -135,7 +149,7 @@ public class EnemyAgent extends Character {
     //premikanje proti playerju
     public void determineSubState() {
         //poti ne posodabljam vsaki frame
-        if (updateCounter == UPDATE) {
+        if (updateCounter == updateInterval) {
             findPlayerPath();
             updateCounter = 0;
         } else {
@@ -161,11 +175,12 @@ public class EnemyAgent extends Character {
 
     //premikanje na varnost
     public void moveToSafety() {
-        if (updateCounter == UPDATE) {
+        if (updateCounter == updateInterval) {
             findSafePath();
             updateCounter = 0;
+        } else {
+            updateCounter++;
         }
-        updateCounter++;
         float delta = Gdx.graphics.getDeltaTime();
         boolean mUp = false;
         boolean mDown = false;
@@ -291,7 +306,7 @@ public class EnemyAgent extends Character {
         GraphPath<Tile> tmp;
         int i = 0;
         while (i < gameFieldGraphEmpty.tiles.size &&
-                gameFieldGraphEmpty.tiles.get(i).willExplode ||
+                gameFieldGraphEmpty.tiles.get(i).getWillExplode() ||
                 tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true)) {
             i++;
         }
@@ -299,14 +314,14 @@ public class EnemyAgent extends Character {
             tmpPath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
             i++;
             while (i < gameFieldGraphEmpty.tiles.size && tmpPath.getCount() == 0) {
-                if (!gameFieldGraphEmpty.tiles.get(i).willExplode &&
+                if (!gameFieldGraphEmpty.tiles.get(i).getWillExplode() &&
                         !tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true) &&
                         gameFieldGraphEmpty.tiles.get(i) != startTile)
                     tmpPath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
                 i++;
             }
             for (; i < gameFieldGraphEmpty.tiles.size; i++) {
-                if (!gameFieldGraphEmpty.tiles.get(i).willExplode &&
+                if (!gameFieldGraphEmpty.tiles.get(i).getWillExplode() &&
                         !tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true) &&
                         gameFieldGraphEmpty.tiles.get(i) != startTile) {
                     tmp = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
@@ -336,34 +351,32 @@ public class EnemyAgent extends Character {
         //poiščem najkrajšo pot na varno
         Tile startTile = this.closestTile(gameFieldGraphEmpty.tiles);
         GraphPath<Tile> tmp;
-        int i = 0;
-        //iščem varno polje
-        while (i < gameFieldGraphEmpty.tiles.size && gameFieldGraphEmpty.tiles.get(i).willExplode) {
-            i++;
-        }
-        //če sem v vseh možnih poljim našel varno polje
-        if (i < gameFieldGraphEmpty.tiles.size) {
-            //izračunam pot do tega polja
-            safePath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
-            i++;
-            //iščem pot ki obstaja(dolžina ni enaka 0)
-            while (i < gameFieldGraphEmpty.tiles.size && safePath.getCount() == 0) {
-                if (!gameFieldGraphEmpty.tiles.get(i).willExplode)
-                    safePath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
-                i++;
-            }
-            //preverim če obstaja krajša pot, jo zamenjam
-            for (; i < gameFieldGraphEmpty.tiles.size; i++) {
-                if (!gameFieldGraphEmpty.tiles.get(i).willExplode) {
-                    tmp = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
-                    if (tmp.getCount() != 0 && tmp.getCount() < safePath.getCount()) {
-                        safePath = tmp;
-                    }
+        Array<GraphPath<Tile>> avilablePaths = new Array<>();
+
+        for (int i = 0; i < gameFieldGraphEmpty.tiles.size; i++) {
+            if (!gameFieldGraphEmpty.tiles.get(i).getWillExplode()) {
+                tmp = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
+                if (tmp.getCount() != 0) {
+                    avilablePaths.add(tmp);
                 }
             }
-        } else {
-            //prazna pot dolžien nič
+        }
+        //ni najdene poti
+        Comparator<GraphPath<Tile>> comparator = new Comparator<GraphPath<Tile>>() {
+            @Override
+            public int compare(GraphPath<Tile> path1, GraphPath<Tile> path2) {
+                return path1.getCount()-path2.getCount();
+            }
+        };
+
+        avilablePaths.sort(comparator);
+
+        if (avilablePaths.size==0){
             safePath = new DefaultGraphPath<Tile>();
+        }else if(avilablePaths.size-1 < difficulty){
+            safePath=avilablePaths.get(avilablePaths.size-1);
+        }else{
+            safePath = avilablePaths.get(difficulty);
         }
     }
 

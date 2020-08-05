@@ -18,27 +18,27 @@ public abstract class Character {
     public static final float IMMUNE_TIME = 1f; //kako dogo igralec ne mora biti pošodovan po prejemu škode - drugač bi vsaki frame ko se dotikaš ognja izgubil življenje
     public static final int START_HEALTH = 100; //začetno življenje, bomba naredi 25 škode
 
-    Rectangle bounds;
-    Vector2 pos;
-    Vector2 speed;
+    public Rectangle bounds;
+    public Vector2 pos;
+    public Vector2 speed;
 
     //za animacijo
-    float animationTime;
+    public float animationTime;
     public boolean isMoving;    //če je true se bo animacija prikazala drugač bo slika primiru
 
     public String username;
 
-    GameField gameField;
+    public GameField gameField;
 
-    int health;
-    int power;  //moč bombe za igralca
-    int bombs_max;  //maksimalno število bomb ki jih lahko nastavi igralec na enkrat
-    int bombs_placed;   //trenutno število nastavljenih bomb
-    float imune_timer;  //koliko časa je minilo od zadnje škode
+    public int health;
+    public int power;  //moč bombe za igralca
+    public int bombs_max;  //maksimalno število bomb ki jih lahko nastavi igralec na enkrat
+    public int bombs_placed;   //trenutno število nastavljenih bomb
+    public float imune_timer;  //koliko časa je minilo od zadnje škode
     public boolean runner;
 
-    Color oldColor;
-    Color color;
+    public Color oldColor;
+    public Color color;
 
     TextureRegion skull;
     TextureRegion characterUp;

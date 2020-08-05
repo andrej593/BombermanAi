@@ -63,19 +63,26 @@ public class MenuScreen extends ScreenAdapter {
 		Table table = new Table();
 		table.setFillParent(true);
 		
-		TextButton startGameBtn = new TextButton("START GAME", skin);
-		startGameBtn.addListener(new ClickListener() {
+		TextButton startMultyBtn = new TextButton("Multiplayer", skin);
+		startMultyBtn.addListener(new ClickListener() {
 			@Override public void clicked(InputEvent event, float x, float y) {
-				game.setScreen(new PlayerScreen(game));
+				game.setScreen(new PlayerScreen(game, false));
+			}
+		});
+
+		TextButton startSingleBtn = new TextButton("Singleplayer", skin);
+		startSingleBtn.addListener(new ClickListener() {
+			@Override public void clicked(InputEvent event, float x, float y) {
+				game.setScreen(new PlayerScreen(game, true));
 			}
 		});
 		
-		TextButton settingsBtn = new TextButton("Settings", skin);
-		settingsBtn.addListener(new ClickListener() {
+		//TextButton settingsBtn = new TextButton("Settings", skin);
+		/*settingsBtn.addListener(new ClickListener() {
 			@Override public void clicked(InputEvent event, float x, float y) {
 				game.setScreen(new SettingsScreen(game));
 			}
-		});
+		});*/
 		TextButton exitBtn = new TextButton("Exit", skin);
 		TextButton resultsBtn = new TextButton("Results", skin);
 		resultsBtn.addListener(new ClickListener() {
@@ -88,21 +95,24 @@ public class MenuScreen extends ScreenAdapter {
 				game.safeExit();
 			}
 		});
+
 		table.add();
 		table.add();
-		table.add(exitBtn).align(Align.right);
-		
 		table.row();
 		table.add().height(100);
+
 		table.row().padBottom(5).colspan(3);
-		table.add(settingsBtn);
+		table.add(startSingleBtn).width(350).height(125);
+
 		table.row().colspan(3).padBottom(5);
-		table.add(resultsBtn);
-		table.row().colspan(3);
-		table.add(startGameBtn).width(400).height(150);
-		
-		/*table.row();
-		table.add(resultsBtn).colspan(5);*/
+		table.add(startMultyBtn).width(350).height(125);
+
+		table.row().colspan(3).padBottom(5);
+		table.add(resultsBtn).width(350).height(125);
+
+		table.row().colspan(3).padBottom(5);
+		table.add(exitBtn);
+
 		
 		return table;
 	}

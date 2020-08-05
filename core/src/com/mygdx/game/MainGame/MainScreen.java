@@ -18,15 +18,17 @@ import com.badlogic.gdx.utils.Logger;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.Ai.EnemyAgent;
 import com.mygdx.game.BombermanGame;
 import com.mygdx.game.GameManager.GameManager;
+import com.mygdx.game.MainMenuScreens.AiDifficultyScreen;
 import com.mygdx.game.MainMenuScreens.MenuScreen;
 import com.mygdx.game.MainMenuScreens.SettingsScreen;
 import com.mygdx.game.assets.AssetDescriptors;
 import com.mygdx.game.assets.RegionNames;
 import com.mygdx.game.debug.DebugCameraController;
 import com.mygdx.game.hud.HUD;
-import com.mygdx.game.pathfinding.GameFieldGraph;
+import com.mygdx.game.Ai.Pathfinding.GameFieldGraph;
 import com.mygdx.game.util.GdxUtils;
 
 public class MainScreen extends ScreenAdapter {
@@ -75,7 +77,7 @@ public class MainScreen extends ScreenAdapter {
 
     HUD hud;
 
-    public MainScreen(BombermanGame game, int width, int height, int powerups, int numP) {
+    public MainScreen(BombermanGame game, int width, int height, int powerups, int numP, int difficulty) {
         this.game=game;
         this.width=width;
         this.height=height;
@@ -99,19 +101,33 @@ public class MainScreen extends ScreenAdapter {
         this.gameFieldGraphWalls = new GameFieldGraph(gameField, width, GameFieldGraph.WALL_PATH);
         this.gameFieldGraphEmpty = new GameFieldGraph(gameField, width, GameFieldGraph.EMPTY_PATH);
 
+
         players = new Array<Character>();
-        players.add(new Player(0, 1, height-2, atlas, SettingsScreen.player1Name, Color.WHITE, gameField));
-        players.add(new EnemyAgent(width-2, height-2, atlas, SettingsScreen.player2Name, Color.RED, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty));
-        if(numP == 3){
-            players.add(new EnemyAgent(width-2, 1, atlas, SettingsScreen.player3Name, Color.BLUE, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty));
-            //players.add(new Player(2, width-2, 1, atlas, SettingsScreen.player3Name, gameField));
+        if(difficulty == AiDifficultyScreen.NONE){
+            players.add(new Player(0, 1, height-2, atlas, SettingsScreen.player1Name, Color.WHITE, gameField));
+            players.add(new Player(1, width-2, height-2, atlas, SettingsScreen.player2Name, Color.RED, gameField));
+            if(numP == 3){
+                players.add(new Player(2, width-2, 1, atlas, SettingsScreen.player3Name,Color.BLUE, gameField));
+            }
+            if(numP == 4){
+                players.add(new Player(2, width-2, 1, atlas, SettingsScreen.player3Name,Color.BLUE, gameField));
+                players.add(new Player(3, 1, 1, atlas, SettingsScreen.player4Name,Color.GREEN, gameField));
+            }
+        }else{
+            difficulty--;
+            MainScreen.log.debug(difficulty+"");
+            players.add(new Player(0, 1, height-2, atlas, SettingsScreen.player1Name, Color.WHITE, gameField));
+            players.add(new com.mygdx.game.Ai.EnemyAgent(width-2, height-2, atlas, "BOT1", Color.RED, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, difficulty));
+            if(numP == 3){
+                players.add(new com.mygdx.game.Ai.EnemyAgent(width-2, 1, atlas, "BOT2", Color.BLUE, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, difficulty));
+            }
+            if(numP == 4){
+                players.add(new com.mygdx.game.Ai.EnemyAgent(width-2, 1, atlas, "BOT2", Color.BLUE, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, difficulty));
+                players.add(new EnemyAgent(1, 1, atlas, "BOT3", Color.GREEN, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, difficulty));
+
+            }
         }
-        if(numP == 4){
-            players.add(new EnemyAgent(width-2, 1, atlas, SettingsScreen.player3Name, Color.BLUE, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty));
-            players.add(new EnemyAgent(1, 1, atlas, SettingsScreen.player4Name, Color.GREEN, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty));
-            //players.add(new Player(2, width-2, 1, atlas, SettingsScreen.player3Name, gameField));
-            //players.add(new Player(3, 1, 1, atlas, SettingsScreen.player4Name, gameField));
-        }
+
 
         cameraFont = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         viewportFont = new ScreenViewport(cameraFont);

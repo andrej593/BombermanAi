@@ -14,7 +14,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.BombermanGame;
@@ -23,7 +22,12 @@ import com.mygdx.game.assets.AssetDescriptors;
 import com.mygdx.game.util.GameConfig;
 import com.mygdx.game.util.GdxUtils;
 
-public class PlayerScreen extends ScreenAdapter {
+public class AiDifficultyScreen extends ScreenAdapter {
+    public static final int NONE = 0;
+    public static final int EASY = 3;
+    public static final int MEDIUM = 2;
+    public static final int HARD = 1;
+
     private Stage stage;
     private BombermanGame game;
     private Viewport viewport;
@@ -31,12 +35,13 @@ public class PlayerScreen extends ScreenAdapter {
     private AssetManager assetManager;
     private Skin skin;
 
-    boolean ai;
-    public PlayerScreen(BombermanGame game, boolean ai) {
+    int nump;
+
+    public AiDifficultyScreen(BombermanGame game, int nump) {
         this.game = game;
+        this.nump=nump;
         assetManager = game.getAssetManager();
         this.skin = assetManager.get(AssetDescriptors.GAME_UI);
-        this.ai=ai;
     }
 
     @Override public void render(float delta) {
@@ -65,60 +70,40 @@ public class PlayerScreen extends ScreenAdapter {
         Table table = new Table();
         table.setFillParent(true);
 
-        TextButton players2 = new TextButton("2 players", skin);
-        players2.addListener(new ClickListener() {
+        TextButton easyDiffBtn = new TextButton("Easy", skin);
+        easyDiffBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
-                if(!ai)
-                    game.setScreen(new PlayerNamesScreen(game, 2));
-                else
-                    game.setScreen(new AiDifficultyScreen(game, 2));
-
+                game.setScreen(new MainScreen(game, GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.POWERUPS, nump, EASY));
             }
         });
-        TextButton players3 = new TextButton("3 players", skin);
-        players3.addListener(new ClickListener() {
+        TextButton medDiffBtn = new TextButton("Medium", skin);
+        medDiffBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
-                if(!ai)
-                    game.setScreen(new PlayerNamesScreen(game, 3));
-                else
-                    game.setScreen(new AiDifficultyScreen(game, 3));
+                game.setScreen(new MainScreen(game, GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.POWERUPS, nump, MEDIUM));
             }
         });
-        TextButton players4 = new TextButton("4 players", skin);
-        players4.addListener(new ClickListener() {
+        TextButton hardDiffBtn = new TextButton("Hard", skin);
+        hardDiffBtn.addListener(new ClickListener() {
             @Override public void clicked(InputEvent event, float x, float y) {
-                if(!ai)
-                    game.setScreen(new PlayerNamesScreen(game, 4));
-                else
-                    game.setScreen(new AiDifficultyScreen(game, 4));
+                game.setScreen(new MainScreen(game, GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.POWERUPS, nump, HARD));
             }
         });
 
-        TextButton exitBtn = new TextButton("Exit", skin);
 
-        exitBtn.addListener(new ClickListener() {
-            @Override public void clicked(InputEvent event, float x, float y) {
-                game.safeExit();
-            }
-        });
         table.add();
         table.add();
-        table.add(exitBtn).align(Align.right);
-
         table.row();
         table.add().height(100);
-        table.row().padBottom(5).colspan(3);
-        table.add(players2);
-        table.row().colspan(3).padBottom(5);
-        table.add(players3);
-        table.row().colspan(3).padBottom(5);
-        table.add(players4);
-        table.row().colspan(3).padBottom(5);
-        table.row().colspan(3);
-        //table.add(startGameBtn).width(400).height(150);
 
-		/*table.row();
-		table.add(resultsBtn).colspan(5);*/
+        table.row().padBottom(5).colspan(3);
+        table.add(easyDiffBtn).width(350).height(125);
+
+        table.row().colspan(3).padBottom(5);
+        table.add(medDiffBtn).width(350).height(125);
+
+        table.row().colspan(3).padBottom(5);
+        table.add(hardDiffBtn).width(350).height(125);
+
 
         return table;
     }

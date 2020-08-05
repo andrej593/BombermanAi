@@ -1,12 +1,13 @@
-package com.mygdx.game.MainGame;
+package com.mygdx.game.Ai;
 
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.mygdx.game.Ai.EnemyAgent;
 
-public enum EnemySubState implements State<EnemyAgent> {
+public enum EnemySubState implements State<com.mygdx.game.Ai.EnemyAgent> {
     NONE(){
         @Override
-        public void update(EnemyAgent entity) {
+        public void update(com.mygdx.game.Ai.EnemyAgent entity) {
             if(entity.subState != NONE){
                 entity.subStateMachine.changeState(entity.subState);
             }
@@ -14,7 +15,7 @@ public enum EnemySubState implements State<EnemyAgent> {
     },
     INRANGE(){
         @Override
-        public void update(EnemyAgent entity) {
+        public void update(com.mygdx.game.Ai.EnemyAgent entity) {
             if(entity.subState != INRANGE){
                 entity.subStateMachine.changeState(entity.subState);
             }else{
@@ -25,7 +26,7 @@ public enum EnemySubState implements State<EnemyAgent> {
 
     OVERLAPING(){
         @Override
-        public void update(EnemyAgent entity) {
+        public void update(com.mygdx.game.Ai.EnemyAgent entity) {
             if(entity.subState != OVERLAPING){
                 entity.subStateMachine.changeState(entity.subState);
             }else{
@@ -36,7 +37,7 @@ public enum EnemySubState implements State<EnemyAgent> {
 
     OUTOFRANGE(){
         @Override
-        public void update(EnemyAgent entity) {
+        public void update(com.mygdx.game.Ai.EnemyAgent entity) {
             if(entity.subState != OUTOFRANGE){
                 entity.subStateMachine.changeState(entity.subState);
             }else{
@@ -47,12 +48,12 @@ public enum EnemySubState implements State<EnemyAgent> {
 
     //ko vstopi v novo stanje se mu poišče potrebna pot
     @Override
-    public void enter(EnemyAgent entity) {
+    public void enter(com.mygdx.game.Ai.EnemyAgent entity) {
 
     }
 
     @Override
-    public void exit(EnemyAgent entity) {
+    public void exit(com.mygdx.game.Ai.EnemyAgent entity) {
 
     }
 

@@ -84,7 +84,7 @@ public class PlayerNamesScreen extends ScreenAdapter {
                 if(nump>=4) {
                     player4Name = player4Text.getText();
                 }
-                game.setScreen(new MainScreen(game, GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.POWERUPS, nump));
+                game.setScreen(new MainScreen(game, GameConfig.WIDTH, GameConfig.HEIGHT, GameConfig.POWERUPS, nump,AiDifficultyScreen.NONE));
             }
         });
 

@@ -6,7 +6,7 @@ import com.badlogic.gdx.utils.Array;
 
 public class Tile {
     public Vector2 pos;
-    Rectangle bounds;
+    public Rectangle bounds;
     public int value;
 
     //ločeno indiksiranje, saj se lahko en tile pojavi v obeh grafih in bo v vsakem drugače označen

@@ -1,14 +1,13 @@
-package com.mygdx.game.MainGame;
+package com.mygdx.game.Ai;
 
 import com.badlogic.gdx.ai.fsm.State;
 import com.badlogic.gdx.ai.msg.Telegram;
-import com.mygdx.game.pathfinding.GameFieldGraph;
 
-public enum EnemyState implements State<EnemyAgent> {
+public enum EnemyState implements State<com.mygdx.game.Ai.EnemyAgent> {
     //če je v nevarnosti
     INDANGER(){
         @Override
-        public void update(EnemyAgent entity) {
+        public void update(com.mygdx.game.Ai.EnemyAgent entity) {
             //sprememba stanja če je varen
             if(entity.isSafe){
                 entity.stateMachine.changeState(ISSAFE);
@@ -22,7 +21,7 @@ public enum EnemyState implements State<EnemyAgent> {
     //Če je varen
     ISSAFE(){
         @Override
-        public void update(EnemyAgent entity) {
+        public void update(com.mygdx.game.Ai.EnemyAgent entity) {
             //sprememba stanja če je v nevarnosti
             if(!entity.isSafe){
                 entity.stateMachine.changeState(INDANGER);
@@ -36,7 +35,7 @@ public enum EnemyState implements State<EnemyAgent> {
 
     //ko vstopi v novo stanje se mu poišče potrebna pot
     @Override
-    public void enter(EnemyAgent entity) {
+    public void enter(com.mygdx.game.Ai.EnemyAgent entity) {
         entity.updateCounter=0;
         if(entity.stateMachine.getCurrentState() == EnemyState.INDANGER){
             entity.findSafePath();
@@ -47,8 +46,7 @@ public enum EnemyState implements State<EnemyAgent> {
     }
 
     @Override
-    public void exit(EnemyAgent entity) {
-
+    public void exit(com.mygdx.game.Ai.EnemyAgent entity) {
     }
 
     @Override

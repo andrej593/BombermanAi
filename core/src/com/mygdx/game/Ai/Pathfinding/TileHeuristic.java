@@ -1,4 +1,4 @@
-package com.mygdx.game.pathfinding;
+package com.mygdx.game.Ai.Pathfinding;
 
 import com.badlogic.gdx.ai.pfa.Heuristic;
 import com.badlogic.gdx.math.Vector2;

@@ -1,4 +1,4 @@
-package com.mygdx.game.pathfinding;
+package com.mygdx.game.Ai.Pathfinding;
 
 import com.badlogic.gdx.ai.pfa.Connection;
 import com.badlogic.gdx.ai.pfa.GraphPath;
