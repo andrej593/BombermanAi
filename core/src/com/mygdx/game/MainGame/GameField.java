@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.Array;
 import org.omg.PortableServer.POA;
 
 public class GameField {
-    int width;
-    int height;
+    public int width;
+    public int height;
     public Array<Tile> tiles;
     int powerups;
 

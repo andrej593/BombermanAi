@@ -12,10 +12,12 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MainGame.Bomb;
 import com.mygdx.game.MainGame.Character;
 import com.mygdx.game.MainGame.GameField;
+import com.mygdx.game.MainGame.MainScreen;
 import com.mygdx.game.MainGame.Tile;
 import com.mygdx.game.Ai.Pathfinding.GameFieldGraph;
 
 import java.util.Comparator;
+import java.util.Random;
 
 public class EnemyAgent extends Character {
     int updateCounter;
@@ -32,7 +34,7 @@ public class EnemyAgent extends Character {
 
     EnemySubState subState;
     boolean isSafe; //če je varen
-    Character target;   //igralec ki je trenutna tarča
+    public Character target;   //igralec ki je trenutna tarča
 
     Array<Bomb> bombs;
     Array<Character> players;
@@ -56,9 +58,9 @@ public class EnemyAgent extends Character {
         if(difficulty == 0){
             updateInterval =0;
         }else if(difficulty == 1){
-            updateInterval =15;
+            updateInterval =10;
         }else if(difficulty == 2){
-            updateInterval =30;
+            updateInterval =20;
         }
     }
 
@@ -130,14 +132,14 @@ public class EnemyAgent extends Character {
         for (int i = 0; i < playerPath.getCount(); i++) {
             if (this.bounds.overlaps(playerPath.get(i).bounds)) {
                 if (runner) {
-                    if (playerPath.get(i).right(gameField).isSafeTile())
+                    if (playerPath.get(i).right(gameField, 1).isSafeTile())
                         mRight = true;
-                    if (playerPath.get(i).up(gameField).isSafeTile())
+                    if (playerPath.get(i).up(gameField, 1).isSafeTile())
                         mUp = true;
                 } else {
-                    if (playerPath.get(i).left(gameField).isSafeTile())
+                    if (playerPath.get(i).left(gameField, 1).isSafeTile())
                         mLeft = true;
-                    if (playerPath.get(i).down(gameField).isSafeTile())
+                    if (playerPath.get(i).down(gameField, 1).isSafeTile())
                         mDown = true;
                 }
                 break;
@@ -230,7 +232,7 @@ public class EnemyAgent extends Character {
                     target = p;
                 } else if (calculateDistance(this, p) < calculateDistance(this, target))
                     target = p;
-                runner = target.runner ? false : true;
+                runner = !target.runner;
             }
         }
     }
@@ -242,7 +244,31 @@ public class EnemyAgent extends Character {
     //poiščem pot do najbližjega igralca
     public void findPlayerPath() {
         this.setTarget();
-        playerPath = gameFieldGraphWalls.findPath(this.closestTile(gameFieldGraphWalls.tiles), target.closestTile(gameFieldGraphWalls.tiles));
+        Random random=new Random();
+        int max=difficulty+1;
+        int x = random.nextInt(max);
+        int y = random.nextInt(max);
+        boolean up= random.nextBoolean();
+        boolean left= random.nextBoolean();
+        Tile tmp= target.closestTile(gameFieldGraphWalls.tiles);
+
+        if(up) {
+            if ((tmp.pos.y + y) < gameField.height)
+                tmp = tmp.up(gameField, y);
+        }else {
+            if ((tmp.pos.y - y) > 0)
+                tmp = tmp.down(gameField, y);
+        }
+        if(left) {
+            if ((tmp.pos.x - x) > 0)
+                tmp = tmp.left(gameField, x);
+        } else {
+            if ((tmp.pos.x + x) < gameField.width)
+                tmp = tmp.right(gameField, x);
+        }
+        tmp=tmp.closestTile(gameFieldGraphWalls.tiles);
+        //MainScreen.log.debug(x+", "+y+", "+difficulty);
+        playerPath = gameFieldGraphWalls.findPath(this.closestTile(gameFieldGraphWalls.tiles), tmp);
     }
 
     //pogeldam če je varno nastaviti bombo - not perfect
@@ -251,9 +277,10 @@ public class EnemyAgent extends Character {
         Tile tmp = this.closestTile(gameField.tiles);
         Array<Tile> tileWouldExplode = new Array<>();
 
+        //napolnim tileWouldExplode
         //UP
         for (int i = 1; i < power + 1; i++) {
-            tmp = tmp.up(gameField);
+            tmp = tmp.up(gameField, 1);
             if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                 tileWouldExplode.add(tmp);
                 if (tmp.isTile(GameField.FIELD_WALL))
@@ -263,7 +290,7 @@ public class EnemyAgent extends Character {
         }
         //DOWN
         for (int i = 1; i < power + 1; i++) {
-            tmp = tmp.down(gameField);
+            tmp = tmp.down(gameField, 1);
             if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                 tileWouldExplode.add(tmp);
                 if (tmp.isTile(GameField.FIELD_WALL))
@@ -273,7 +300,7 @@ public class EnemyAgent extends Character {
         }
         //RIGHT
         for (int i = 1; i < power + 1; i++) {
-            tmp = tmp.right(gameField);
+            tmp = tmp.right(gameField, 1);
             if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                 tileWouldExplode.add(tmp);
                 if (tmp.isTile(GameField.FIELD_WALL))
@@ -283,7 +310,7 @@ public class EnemyAgent extends Character {
         }
         //LEFT
         for (int i = 1; i < power + 1; i++) {
-            tmp = tmp.left(gameField);
+            tmp = tmp.left(gameField, 1);
             if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                 tileWouldExplode.add(tmp);
                 if (tmp.isTile(GameField.FIELD_WALL))
@@ -291,60 +318,26 @@ public class EnemyAgent extends Character {
             } else
                 break;
         }
+
         //posodobim graf
         gameFieldGraphEmpty.findEmptyNodes();
-        return checkIfStillSafe(tileWouldExplode);
-    }
-
-
-    public boolean checkIfStillSafe(Array<Tile> tileWouldExplode) {
-        //poiščem najkrajšo pot na varno,
-        //enako kot iskanje varne poti, pri čemer izključim polja,
-        //ki bojo eksplodirala če nastavim bombo, iz končne destinacije
         Tile startTile = this.closestTile(gameFieldGraphEmpty.tiles);
+        //GraphPath<Tile> tmpPath;
         GraphPath<Tile> tmpPath;
-        GraphPath<Tile> tmp;
-        int i = 0;
-        while (i < gameFieldGraphEmpty.tiles.size &&
-                gameFieldGraphEmpty.tiles.get(i).getWillExplode() ||
-                tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true)) {
-            i++;
-        }
-        if (i < gameFieldGraphEmpty.tiles.size) {
-            tmpPath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
-            i++;
-            while (i < gameFieldGraphEmpty.tiles.size && tmpPath.getCount() == 0) {
-                if (!gameFieldGraphEmpty.tiles.get(i).getWillExplode() &&
-                        !tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true) &&
-                        gameFieldGraphEmpty.tiles.get(i) != startTile)
-                    tmpPath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
-                i++;
-            }
-            for (; i < gameFieldGraphEmpty.tiles.size; i++) {
-                if (!gameFieldGraphEmpty.tiles.get(i).getWillExplode() &&
-                        !tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true) &&
-                        gameFieldGraphEmpty.tiles.get(i) != startTile) {
-                    tmp = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
-                    if (tmp.getCount() != 0 && tmp.getCount() < tmpPath.getCount()) {
-                        tmpPath = tmp;
-                    }
+        Array<GraphPath<Tile>> avilablePaths = new Array<>();
+        for (int i = 0; i < gameFieldGraphEmpty.tiles.size; i++) {
+            if (!gameFieldGraphEmpty.tiles.get(i).getWillExplode() && !tileWouldExplode.contains(gameFieldGraphEmpty.tiles.get(i), true)) {
+                tmpPath = gameFieldGraphEmpty.findPath(startTile, gameFieldGraphEmpty.tiles.get(i));
+                if (tmpPath.getCount() != 0) {
+                    avilablePaths.add(tmpPath);
                 }
             }
-        } else {
-            tmpPath = new DefaultGraphPath<Tile>();
         }
-
-        //če je dobljena pot prazna vrnem false - ni varno nastaviti bombe
-        //NOTE preverim še če je prvo polje v poti varno, deluje malo bolše
-        // , ni prefektno, včasih nastavi bombo, in se premakne na polja ki eksplodirajo kasneje
-        // nimam vključeno da bi vedel koliko časa bo neko polje še varno pred eksplozijo in koliko časa bo character potreboval da pride čez tisto polje
-        if (tmpPath.getCount() > 1 && tmpPath.get(1).isSafeTile()) {
-            if (tmpPath.getCount() > 2 && tmpPath.get(2).isSafeTile()) {
-                return true;
-            }
-            return true;
-        } else
+        if (avilablePaths.size==0){
             return false;
+        }else{
+            return true;
+        }
     }
 
     public void findSafePath() {
@@ -382,16 +375,23 @@ public class EnemyAgent extends Character {
 
     //izris trenutne poti ki ji sledi
     public void renderPath(ShapeRenderer sr) {
+        sr.setAutoShapeType(true);
+        sr.set(ShapeRenderer.ShapeType.Filled);
         if (stateMachine.getCurrentState() == EnemyState.ISSAFE) {
-            sr.setColor(Color.PURPLE);
+            sr.setColor(Color.BLUE);
+
             for (Tile t : playerPath) {
-                sr.rect(t.bounds.x, t.bounds.y, t.bounds.width, t.bounds.height);
+                //sr.rect(t.bounds.x, t.bounds.y, t.bounds.width, t.bounds.height);
+                sr.rect(t.bounds.x+0.25f, t.bounds.y+0.25f, t.bounds.width/2, t.bounds.height/2);
+
             }
         } else if (stateMachine.getCurrentState() == EnemyState.INDANGER) {
-            sr.setColor(Color.PURPLE);
+            sr.setColor(Color.RED);
             for (Tile t : safePath) {
-                sr.rect(t.bounds.x, t.bounds.y, t.bounds.width, t.bounds.height);
+                //sr.rect(t.bounds.x, t.bounds.y, t.bounds.width, t.bounds.height);
+                sr.rect(t.bounds.x+0.25f, t.bounds.y+0.25f, t.bounds.width/2, t.bounds.height/2);
             }
         }
+        sr.set(ShapeRenderer.ShapeType.Line);
     }
 }

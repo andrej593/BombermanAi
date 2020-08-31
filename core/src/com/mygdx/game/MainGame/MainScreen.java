@@ -63,6 +63,7 @@ public class MainScreen extends ScreenAdapter {
     public boolean paused = false;
     public int gameState;
     public Character winner;
+    public int bombcounter=0;
 
     TextureRegion empty;
     TextureRegion wall;
@@ -118,6 +119,18 @@ public class MainScreen extends ScreenAdapter {
             MainScreen.log.debug(difficulty+"");
             players.add(new Player(0, 1, height-2, atlas, SettingsScreen.player1Name, Color.WHITE, gameField));
             players.add(new com.mygdx.game.Ai.EnemyAgent(width-2, height-2, atlas, "BOT1", Color.RED, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, difficulty));
+            /*EnemyAgent e1=new com.mygdx.game.Ai.EnemyAgent(width-2, height-2, atlas, "BOT1", Color.RED, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, 2);
+            EnemyAgent e2=new com.mygdx.game.Ai.EnemyAgent(1, height-2, atlas, "BOT2", Color.WHITE, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, 2);
+            e1.target=e2;
+            e2.target=e1;
+            e1.findPlayerPath();
+            e1.findSafePath();
+            e2.findPlayerPath();
+            e2.findSafePath();
+            players.add(e1);
+            players.add(e2);*/
+
+
             if(numP == 3){
                 players.add(new com.mygdx.game.Ai.EnemyAgent(width-2, 1, atlas, "BOT2", Color.BLUE, gameField, players, players.get(0), bombs, gameFieldGraphWalls, gameFieldGraphEmpty, difficulty));
             }
@@ -180,6 +193,8 @@ public class MainScreen extends ScreenAdapter {
                     if (b.time >= Bomb.LIFE_TIME) {
                         b.destroy(gameField);
                         bombs.removeIndex(i);
+                        bombcounter++;
+                        MainScreen.log.debug(bombcounter+"");
                     }
                 }
 
@@ -239,7 +254,7 @@ public class MainScreen extends ScreenAdapter {
             //vsi tilei
             sr.setColor(Color.BLUE);
             for (Tile t : gameField.tiles) {
-                    sr.rect(t.bounds.x, t.bounds.y, t.bounds.width, t.bounds.height);
+                sr.rect(t.bounds.x, t.bounds.y, t.bounds.width, t.bounds.height);
             }
             //player hitbox + ai paths
             sr.setColor(Color.BLACK);
@@ -266,69 +281,69 @@ public class MainScreen extends ScreenAdapter {
     public void drawField(){
         batch.setProjectionMatrix(boardCam.combined);
         for(Tile t: gameField.tiles){
-                switch (t.value) {
-                    case GameField.FIELD_EMPTY: {
-                        batch.draw(empty,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.FIELD_WALL:
-                    case GameField.FIELD_EMPTY | GameField.FIELD_WALL | GameField.POWERUP_SPEED:
-                    case GameField.FIELD_EMPTY | GameField.FIELD_WALL | GameField.POWERUP_POWER:
-                    case GameField.FIELD_EMPTY | GameField.FIELD_WALL | GameField.POWERUP_BOMBS: {
-                        batch.draw(wall,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.BOMB: {
-                        batch.draw(bombN,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.POWERUP_POWER:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.POWERUP_SPEED:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.POWERUP_BOMBS:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONV | GameField.BOMB:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONH | GameField.BOMB:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.BOMB:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONV:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONH:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONM:{
-                        batch.draw(explosionM,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.POWERUP_BOMBS:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.POWERUP_SPEED:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.POWERUP_POWER:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV |GameField.EXPLOSIONH | GameField.BOMB:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.BOMB:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV |GameField.EXPLOSIONH:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONV:{
-                        batch.draw(explosionV,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.POWERUP_BOMBS:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.POWERUP_SPEED:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.POWERUP_POWER:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.BOMB:
-                    case GameField.FIELD_EMPTY | GameField.EXPLOSIONH:{
-                        batch.draw(explosionH,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_UNBRAKABLE_WALL: {
-                        batch.draw(wallS,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.POWERUP_POWER: {
-                        batch.draw(power,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.POWERUP_BOMBS: {
-                        batch.draw(bomb,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
-                    case GameField.FIELD_EMPTY | GameField.POWERUP_SPEED: {
-                        batch.draw(speedup,t.pos.x,t.pos.y,1,1);
-                        continue;
-                    }
+            switch (t.value) {
+                case GameField.FIELD_EMPTY: {
+                    batch.draw(empty,t.pos.x,t.pos.y,1,1);
+                    continue;
                 }
+                case GameField.FIELD_EMPTY | GameField.FIELD_WALL:
+                case GameField.FIELD_EMPTY | GameField.FIELD_WALL | GameField.POWERUP_SPEED:
+                case GameField.FIELD_EMPTY | GameField.FIELD_WALL | GameField.POWERUP_POWER:
+                case GameField.FIELD_EMPTY | GameField.FIELD_WALL | GameField.POWERUP_BOMBS: {
+                    batch.draw(wall,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.BOMB: {
+                    batch.draw(bombN,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.POWERUP_POWER:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.POWERUP_SPEED:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.POWERUP_BOMBS:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONV | GameField.BOMB:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONH | GameField.BOMB:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.BOMB:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONV:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM | GameField.EXPLOSIONH:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONM:{
+                    batch.draw(explosionM,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.POWERUP_BOMBS:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.POWERUP_SPEED:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.POWERUP_POWER:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV |GameField.EXPLOSIONH | GameField.BOMB:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV | GameField.BOMB:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV |GameField.EXPLOSIONH:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONV:{
+                    batch.draw(explosionV,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.POWERUP_BOMBS:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.POWERUP_SPEED:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.POWERUP_POWER:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONH | GameField.BOMB:
+                case GameField.FIELD_EMPTY | GameField.EXPLOSIONH:{
+                    batch.draw(explosionH,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_UNBRAKABLE_WALL: {
+                    batch.draw(wallS,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.POWERUP_POWER: {
+                    batch.draw(power,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.POWERUP_BOMBS: {
+                    batch.draw(bomb,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+                case GameField.FIELD_EMPTY | GameField.POWERUP_SPEED: {
+                    batch.draw(speedup,t.pos.x,t.pos.y,1,1);
+                    continue;
+                }
+            }
         }
     }
 

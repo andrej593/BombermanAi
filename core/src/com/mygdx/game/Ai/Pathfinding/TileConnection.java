@@ -16,11 +16,6 @@ public class TileConnection implements Connection<Tile> {
         this.cost = cost;
     }
 
-    public void render(ShapeRenderer shapeRenderer){
-        shapeRenderer.setColor(0, 0, 0, 1);
-        shapeRenderer.rectLine(fromTile.pos.x, fromTile.pos.y, toTile.pos.x, toTile.pos.y, 1);
-    }
-
     @Override
     public String toString() {
         return "TileConnection{" +

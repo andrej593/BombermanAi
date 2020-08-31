@@ -198,7 +198,7 @@ public abstract class Character {
                     //UP
                     for (int i = 1; i < power + 1; i++) {
                         //tile 1 više od prejšnega
-                        tmp = tmp.up(gameField);
+                        tmp = tmp.up(gameField, 1);
                         //če je neprebojen zid ne označujem dalje
                         if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                             tmp.setWillExplode(true);
@@ -213,7 +213,7 @@ public abstract class Character {
                     //DOWN
                     tmp = this.closestTile(gameField.tiles);
                     for (int i = 1; i < power + 1; i++) {
-                        tmp = tmp.down(gameField);
+                        tmp = tmp.down(gameField, 1);
                         if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                             tmp.setWillExplode(true);
                             if (tmp.isTile(GameField.FIELD_WALL)) {
@@ -226,7 +226,7 @@ public abstract class Character {
                     //RIGHT
                     tmp = this.closestTile(gameField.tiles);
                     for (int i = 1; i < power + 1; i++) {
-                        tmp = tmp.right(gameField);
+                        tmp = tmp.right(gameField, 1);
                         if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                             tmp.setWillExplode(true);
                             if (tmp.isTile(GameField.FIELD_WALL)) {
@@ -239,7 +239,7 @@ public abstract class Character {
                     //LEFT
                     tmp = this.closestTile(gameField.tiles);
                     for (int i = 1; i < power + 1; i++) {
-                        tmp = tmp.left(gameField);
+                        tmp = tmp.left(gameField, 1);
                         if (!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)) {
                             tmp.setWillExplode(true);
                             if (tmp.isTile(GameField.FIELD_WALL)) {

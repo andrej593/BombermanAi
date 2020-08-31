@@ -13,14 +13,11 @@ import com.badlogic.gdx.ai.pfa.DefaultGraphPath;
 public class GameFieldGraph implements IndexedGraph<Tile> {
     public static final int WALL_PATH = 0;
     public static final int EMPTY_PATH = 1;
-
     int width;
-
     GameField gameField;
     public Array<Tile> tiles;
     public Array<TileConnection> connections;
     ObjectMap<Tile, Array<Connection<Tile>>> tileConnections;
-
     TileHeuristic tileHeuristic = new TileHeuristic();
     public int pathType;
 
@@ -34,7 +31,6 @@ public class GameFieldGraph implements IndexedGraph<Tile> {
         update();
     }
 
-    //ponovno zgradim graf - tile se spreminjajo in jih je potrebno zamenjat
     public void update(){
         if(this.pathType == WALL_PATH){
             findWallNodes();
@@ -64,10 +60,10 @@ public class GameFieldGraph implements IndexedGraph<Tile> {
         //dodamo povezave za vsaki tile ki je v grafu
         for(Tile t : this.tiles){
             tileConnections.put(t, new Array<Connection<Tile>>());
-            Tile up = t.up(gameField);
-            Tile down = t.down(gameField);
-            Tile left = t.left(gameField);
-            Tile right =t.right(gameField);
+            Tile up = t.up(gameField, 1);
+            Tile down = t.down(gameField, 1);
+            Tile left = t.left(gameField, 1);
+            Tile right =t.right(gameField, 1);
 
             int cost;
             //preverimo če je tile v grafu
@@ -138,10 +134,10 @@ public class GameFieldGraph implements IndexedGraph<Tile> {
 
         for(Tile t : this.tiles){
             tileConnections.put(t, new Array<Connection<Tile>>());
-            Tile up = t.up(gameField);
-            Tile down = t.down(gameField);
-            Tile left = t.left(gameField);
-            Tile right =t.right(gameField);
+            Tile up = t.up(gameField, 1);
+            Tile down = t.down(gameField, 1);
+            Tile left = t.left(gameField, 1);
+            Tile right =t.right(gameField, 1);
 
             int cost = 1;
             if(tiles.contains(up, true)){
@@ -167,13 +163,11 @@ public class GameFieldGraph implements IndexedGraph<Tile> {
         }
     }
 
-    //poiščem pot med dvema tiloma v grafu
     public GraphPath<Tile> findPath(Tile startTile, Tile goalTile){
         GraphPath<Tile> tilePath = new DefaultGraphPath<>();
         new IndexedAStarPathFinder<>(this).searchNodePath(startTile, goalTile, tileHeuristic, tilePath);
         return tilePath;
     }
-
 
     @Override
     public int getIndex(Tile node) {

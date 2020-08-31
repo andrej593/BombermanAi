@@ -62,7 +62,7 @@ public class Bomb {
                 //posodobim še ostale tile explozije
                 //UP
                 for(int i=1;i<power+1;i++){
-                    tmp = tmp.up(f);
+                    tmp = tmp.up(f, 1);
                     //če je neprebojen zid se ustavim
                     if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                         //če je bomba jo prisilno sprožim
@@ -89,7 +89,7 @@ public class Bomb {
                 //DOWN
                 tmp = this.closestTile(f.tiles);
                 for(int i=1;i<power+1;i++){
-                    tmp = tmp.down(f);
+                    tmp = tmp.down(f, 1);
                     if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                         if(tmp.isTile(GameField.BOMB)){
                             for(Bomb b:bombs){
@@ -112,7 +112,7 @@ public class Bomb {
                 //RIGHT
                 tmp = this.closestTile(f.tiles);
                 for(int i=1;i<power+1;i++){
-                    tmp = tmp.right(f);
+                    tmp = tmp.right(f, 1);
                     if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                         if(tmp.isTile(GameField.BOMB)){
                             for(Bomb b:bombs){
@@ -135,7 +135,7 @@ public class Bomb {
                 //LEFT
                 tmp = this.closestTile(f.tiles);
                 for(int i=1;i<power+1;i++){
-                    tmp = tmp.left(f);
+                    tmp = tmp.left(f, 1);
                     if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                         if(tmp.isTile(GameField.BOMB)){
                             for(Bomb b:bombs){
@@ -168,7 +168,7 @@ public class Bomb {
         tmp.setWillExplode(false);
         //remove up
         for(int i=1;i<power+1;i++){
-            tmp = tmp.up(gf);
+            tmp = tmp.up(gf, 1);
             if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                 tmp.value = tmp.value  & ~GameField.EXPLOSIONV;
                 tmp.setWillExplode(false);
@@ -179,7 +179,7 @@ public class Bomb {
         //DOWN
         tmp = this.closestTile(gf.tiles);
         for(int i=1;i<power+1;i++){
-            tmp = tmp.down(gf);
+            tmp = tmp.down(gf, 1);
             if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                 tmp.value = tmp.value  & ~GameField.EXPLOSIONV;
                 tmp.setWillExplode(false);
@@ -190,7 +190,7 @@ public class Bomb {
         //RIGHT
         tmp = this.closestTile(gf.tiles);
         for(int i=1;i<power+1;i++){
-            tmp = tmp.right(gf);
+            tmp = tmp.right(gf, 1);
             if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                 tmp.value = tmp.value  & ~GameField.EXPLOSIONH;
                 tmp.setWillExplode(false);
@@ -201,7 +201,7 @@ public class Bomb {
         //LEFT
         tmp = this.closestTile(gf.tiles);
         for(int i=1;i<power+1;i++){
-            tmp = tmp.left(gf);
+            tmp = tmp.left(gf, 1);
             if(!tmp.isTile(GameField.FIELD_UNBRAKABLE_WALL)){
                 tmp.value = tmp.value  & ~GameField.EXPLOSIONH;
                 tmp.setWillExplode(false);
